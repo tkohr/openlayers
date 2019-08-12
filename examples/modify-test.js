@@ -4,7 +4,7 @@ import GeoJSON from '../src/ol/format/GeoJSON.js';
 import {defaults as defaultInteractions, Modify, Select} from '../src/ol/interaction.js';
 import VectorLayer from '../src/ol/layer/Vector.js';
 import VectorSource from '../src/ol/source/Vector.js';
-import {Circle as CircleStyle, Fill, Stroke, Style} from '../src/ol/style.js';
+import {Circle as CircleStyle, Fill, Stroke, Style, Icon} from '../src/ol/style.js';
 
 
 const styleFunction = (function() {
@@ -14,7 +14,16 @@ const styleFunction = (function() {
     fill: null,
     stroke: new Stroke({color: 'orange', width: 2})
   });
-  styles['Point'] = new Style({image: image});
+  const pin = new Style({
+    image: new Icon({
+      anchor: [0.5, 46],
+      anchorXUnits: 'fraction',
+      anchorYUnits: 'pixels',
+      opacity: 0.95,
+      src: 'data/icon.png'
+    })
+  })
+  styles['Point'] = pin;
   styles['Polygon'] = new Style({
     stroke: new Stroke({
       color: 'blue',
@@ -187,21 +196,15 @@ const overlayStyle = (function() {
   ];
   styles['MultiLineString'] = styles['LineString'];
 
-  styles['Point'] = [
-    new Style({
-      image: new CircleStyle({
-        radius: 7,
-        fill: new Fill({
-          color: [0, 153, 255, 1]
-        }),
-        stroke: new Stroke({
-          color: [255, 255, 255, 0.75],
-          width: 1.5
-        })
-      }),
-      zIndex: 100000
+  styles['Point'] = [ new Style({
+    image: new Icon({
+      anchor: [0.5, 46],
+      anchorXUnits: 'fraction',
+      anchorYUnits: 'pixels',
+      opacity: 0.5,
+      src: 'data/icon.png'
     })
-  ];
+  }) ];
   styles['MultiPoint'] = styles['Point'];
 
   styles['GeometryCollection'] = styles['Polygon'].concat(styles['Point']);
@@ -218,6 +221,7 @@ const select = new Select({
 const modify = new Modify({
   features: select.getFeatures(),
   style: overlayStyle,
+  offsetY: 23,
   insertVertexCondition: function() {
     // prevent new vertices to be added to the polygons
     return !select.getFeatures().getArray().every(function(feature) {

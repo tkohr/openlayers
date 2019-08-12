@@ -86,6 +86,8 @@ const ModifyEventType = {
  * features. Default is {@link module:ol/events/condition~always}.
  * @property {number} [pixelTolerance=10] Pixel tolerance for considering the
  * pointer close enough to a segment or vertex for editing.
+ * @property {number} [offsetX=0] X offset (in pixels) for activating drag of modify. 
+ * @property {number} [offsetY=0] Y offset (in pixels) for activating drag of modify.
  * @property {import("../style/Style.js").StyleLike} [style]
  * Style used for the features being modified. By default the default edit
  * style is used (see {@link module:ol/style}).
@@ -234,6 +236,20 @@ class Modify extends PointerInteraction {
      */
     this.pixelTolerance_ = options.pixelTolerance !== undefined ?
       options.pixelTolerance : 10;
+
+    /**
+     * @type {number}
+     * @private
+     */
+    this.offsetX_ = options.offsetX !== undefined ?
+      options.offsetX : 0;
+      
+    /**
+     * @type {number}
+     * @private
+     */
+    this.offsetY_ = options.offsetY !== undefined ?
+      options.offsetY : 0;
 
     /**
      * @type {boolean}
@@ -778,6 +794,7 @@ class Modify extends PointerInteraction {
     if (!this.condition_(evt)) {
       return false;
     }
+    // evt.pixel[1] = evt.pixel[1] + 23;
     this.handlePointerAtPixel_(evt.pixel, evt.map);
     const pixelCoordinate = evt.map.getCoordinateFromPixel(evt.pixel);
     this.dragSegments_.length = 0;
@@ -887,6 +904,10 @@ class Modify extends PointerInteraction {
    * @private
    */
   handlePointerAtPixel_(pixel, map) {
+
+    pixel[0] = pixel[0] + this.offsetX_;
+    pixel[1] = pixel[1] + this.offsetY_;
+
     const pixelCoordinate = map.getCoordinateFromPixel(pixel);
     const sortByDistance = function(a, b) {
       return pointDistanceToSegmentDataSquared(pixelCoordinate, a) -
